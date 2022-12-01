@@ -2,10 +2,10 @@
 # sum each elf's calories
 # return the highest number
 
-calories = File.read('input.txt').split("\n\n")
-most_prepared_elf = calories.reduce(0) do |memo, cals|
-  cal_total = cals.split("\n").reduce(0) { |sum, cal| sum + cal.to_i }
-  memo > cal_total ? memo : cal_total
+calories = File.read("input.txt").split("\n\n")
+summed_cals = calories.map do |cal_str|
+  cal_str.split("\n").reduce(0) { |sum, cals| sum + cals.to_i }
 end
 
-p most_prepared_elf
+top_three_total = summed_cals.sort.pop(3).sum
+p top_three_total
