@@ -4,27 +4,27 @@
 #   - strings of letter characters, both upper and lower
 #
 # RULES:
-#   - every string is even
-#   - each half contains exactly onecharacter shared with the other half (missplaced item)
+#   - the input is split into groups of three lines
 #   - each character is assigned a priority
 #     a-z => 1-26
 #     A-Z => 27-52
 #
 # OBJECTIVE:
-#   - find the sum of the priority of all the missplaced items
+#   - find the item shared among all three of each group (badge)
+#   - sum the priorities of all the groups badges
 #
 # ALGO:
 #   - split the file by \n
-#   - reduce
-#     - split string into array of chars
-#     - cmp_1 = first half; cmp_2 = second half
-#     - run array intersection to find missplaced item
-#     - memo + item priority
+#   - create sub-arrays of size 3 in order; i.e. the first three strings is a group, the second three strings is a group, etc...
+#   - for each group
+#     - run an intersection on all three strings
+#     - calc the priority of each badge
+#   - sum the priorities
 
 require 'pry'
 
 LOWERCASE = ('a'..'z').to_a
-UPPERCASE = ('A'..'Z').to_a 
+UPPERCASE = ('A'..'Z').to_a
 
 def calc_priority(char)
   if LOWERCASE.include?(char)
@@ -35,14 +35,17 @@ def calc_priority(char)
 end
 
 inventory = File.read('inventory.txt').split("\n")
-total_priority = inventory.reduce(0) do |memo, sack|
-  sack_arr = sack.split('')
-  half = sack_arr.length / 2
-  cmp_1 = sack_arr.slice(0, half)
-  cmp_2 = sack_arr.slice(half, half)
-  missplaced_item = cmp_1.intersection(cmp_2).pop
-  memo + calc_priority(missplaced_item)
+groups = []
+
+while inventory.length > 0 
+  groups.push inventory.shift(3)
 end
 
-puts total_priority
+badge_priority = groups.reduce(0) do |memo, group|
+  elf_1, elf_2, elf_3 = group.map{|sack| sack.split("")}
+  # intersection returns an array, need to pop out the single string value to pass to calc_priority
+  badge = elf_1.intersection(elf_2, elf_3).pop
+  memo + calc_priority(badge)
+end
 
+puts badge_priority
