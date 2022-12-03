@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# ================ FIRST PUZZLE ====================
 # column 1 = opponents move [A,B,C]
 #   A = rock
 #   B = paper
@@ -36,31 +37,44 @@
 #     - determine outcome
 #     - calc score; selection_score + outcome_score
 #     - add score to memo
-
+#
+# ===================== SECOND PUZZLE =================
+#
+# only change is that column 2 is how the round needs to end
+#   X = lose
+#   Y = draw
+#   Z = win
 require 'pry'
 
 OUTCOME_SCORE_TABLE = {
-  'A X' => 3,
-  'A Y' => 6,
-  'A Z' => 0,
-  'B X' => 0,
-  'B Y' => 3,
-  'B Z' => 6,
-  'C X' => 6,
-  'C Y' => 0,
-  'C Z' => 3
+  'X' => 0,
+  'Y' => 3,
+  'Z' => 6
 }.freeze
 
 PLAY_SCORE = {
-  'X' => 1, 
-  'Y' => 2, 
-  'Z' => 3
-}
+  'rock' => 1,
+  'paper' => 2,
+  'scissors' => 3
+}.freeze
+
+CORRECT_RESPONSE = {
+  'A X' => 'scissors',
+  'A Y' => 'rock',
+  'A Z' => 'paper',
+  'B X' => 'rock',
+  'B Y' => 'paper',
+  'B Z' => 'scissors',
+  'C X' => 'paper',
+  'C Y' => 'scissors',
+  'C Z' => 'rock'
+}.freeze
 
 guide = File.read('strategy_guide.txt').split("\n")
 total_score = guide.reduce(0) do |memo, round|
-  players_move = round.slice(-1, 1)
-  round_score = PLAY_SCORE[players_move] + OUTCOME_SCORE_TABLE[round]
+  players_move = CORRECT_RESPONSE[round]
+  outcome = round.slice(-1, 1)
+  round_score = PLAY_SCORE[players_move] + OUTCOME_SCORE_TABLE[outcome]
   memo + round_score
 end
 
