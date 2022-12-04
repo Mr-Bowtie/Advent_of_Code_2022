@@ -9,7 +9,7 @@
 #   - the two assigmnent ranges are seperated by a comma
 #
 # OBJECTIVE:
-#   - determine in how many assignment pairs does one range fully contain the other
+#   - determine in how many assignment pairs there is any overlapping assignments
 #
 # ALGO:
 #   - split file by \n
@@ -17,14 +17,22 @@
 #     - split line by comma
 #     - for each side
 #       - create a range with the two numbers
+#       - check if the beginning or the end of the opposite range is within the current range.
+#
 require 'pry'
-assignments = File.read('section_assignments.txt').split("\n")
 
+class Range
+  def assignments_overlap?(range)
+    self === range.begin || self === range.end
+  end
+end
+
+assignments = File.read('section_assignments.txt').split("\n")
 overlap_total = assignments.reduce(0) do |memo, ass|
   left_ass, right_ass = ass.split(',').map { |a| a.split('-') }
   left_range = Range.new(left_ass[0].to_i, left_ass[1].to_i)
   right_range = Range.new(right_ass[0].to_i, right_ass[1].to_i)
-  if left_range.cover?(right_range) || right_range.cover?(left_range)
+  if left_range.assignments_overlap?(right_range) || right_range.assignments_overlap?(left_range)
     memo + 1
   else
     memo
@@ -32,4 +40,3 @@ overlap_total = assignments.reduce(0) do |memo, ass|
 end
 
 puts overlap_total
-
