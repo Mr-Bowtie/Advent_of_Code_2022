@@ -9,7 +9,7 @@
 #  - sections are separated by an empty line (\n\n)
 #
 # rules:
-#  - crates are moved one at time, top down
+#  - crates are moved all at once, maintaining their order
 #
 # objective:
 #  - determine which crate will end up on top of each stack
@@ -65,7 +65,7 @@ end
 
 instructions.split("\n").each do |inst|
   count, from_stack, to_stack = extract_values(inst)
-  in_flight_crates = stacks[from_stack].pop(count).reverse
+  in_flight_crates = stacks[from_stack].pop(count)
   stacks[to_stack] += in_flight_crates
 end
 
