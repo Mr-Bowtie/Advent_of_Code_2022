@@ -65,13 +65,17 @@ class ElfFile
 end
 
 class ElfFileSystem
-  attr_accessor :current_dir, :root
+  attr_accessor :current_dir, :root, :unused_space
+  attr_reader :total_space, :update_space
 
   def initialize(term_out)
     @current_dir = nil
     @root = ElfDirectory.new(name: '/')
     build_dir_tree(term_out)
     ElfDirectory.calc_size(root)
+    @total_space = 70_000_000
+    @update_space = 30_000_000
+    @unused_space = total_space - root.size
   end
 
   def build_dir_tree(term_out)
@@ -127,8 +131,15 @@ class ElfFileSystem
     dir.child_dirs.each { |dir| small_dirs(dir: dir, smalls: smalls) }
     smalls
   end
+
+  def smallest_delete_for_update(dir:, sizes: [])
+    sizes.push(dir.size) if unused_space + dir.size >= update_space
+
+    dir.child_dirs.each { |dir| smallest_delete_for_update(dir: dir, sizes: sizes)}
+    sizes.sort.first
+  end
 end
 
 console_out = File.read('term_commands.txt').split("\n")
 fs = ElfFileSystem.new(console_out)
-puts fs.small_dirs(dir: fs.root).sum
+p fs.smallest_delete_for_update(dir: fs.root)
