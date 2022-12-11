@@ -9,35 +9,32 @@ require_relative '../crt_tv'
 # RULES:
 #   - cpu is driven by a clock circuit, each tick is 1 cycle
 #   - register X starts with value 1
-#   - signal strength is calculated: cycle_num * reg_x
+#   - reg_x siginifies the location of the center of a sprit 3 pixels wide on a row 40 pixels wide
+#   - crt draws 1 pixel each cycle
+#   - if any of the sprites pixels overlapp with where the crt is currently drawing, the pixel will show (#), otherwise it's blank (.)
+#   - the crt has a resolution of 40x6
+#   - the crt draws one row at a time left to right
+#   - sprite starts at the bottom right, (position 1)
 #
 # OBJECTIVE:
-#   - calculate the signal strength at cycles: 20, 60, 100, 140, 180, 220
-#   - sum these signal strength together.
+#   - recreate what the CRT displays after completing the full instruction list
+#   - determine what 8 letters are displayed on the screen
 #
 # ALGO:
-#   - create register X with value 1
-#   - start cycle_counter with value 0
-#   - create list of important_cycles
-#   - For each command
-#       - push register value to important_values
-#     - case command
-#     - when noop
-#       - increment_cycle_counter
-#       - next
-#     - when addx
-#       - 2.times do
-#         - increment_cycle_counter
-#       - reg_x += <val>
-#   - increment_cycle_counter
-#     - check if current_cycle is in important_cycles
-#       - push register value to important_values
-#     - cycle_counter += 1
+#   - create crt_row string
+#   - create display array
+#   - for each cycle
+#     - determine sprite position
+#     - append # or . to crt_row if sprite_position.cover?(cycle_counter)
+#     - if crt_row.length == 40
+#       - display.push(crt_row.dup)
+#       - crt_row = ''
+#
 
 RSpec.describe ClockCircuit do
   let(:circuit) { described_class.new }
 
-  before do
+  before(:each) do
     circuit.cpu_commands = circuit.demo_commands
   end
 
@@ -70,7 +67,20 @@ RSpec.describe ClockCircuit do
 
     it 'gives the correct signal strength sum' do
       circuit.execute_commands
-      expect(circuit.sum_sig_strengths).to eql(13140)
+      expect(circuit.sum_sig_strengths).to eql(13_140)
+    end
+  end
+
+  describe 'display' do
+    it 'creates the correct display' do
+      input = '##..##..##..##..##..##..##..##..##..##..
+###...###...###...###...###...###...###.
+####....####....####....####....####....
+#####.....#####.....#####.....#####.....
+######......######......######......####
+#######.......#######.......#######.....'
+      circuit.execute_commands
+      expect(circuit.display.join("\n")).to eql(input)
     end
   end
 end
